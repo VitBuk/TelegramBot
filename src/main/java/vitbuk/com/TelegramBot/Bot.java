@@ -16,21 +16,13 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
 
     TelegramClient telegramClient = new OkHttpTelegramClient(TOKEN);
 
-
-    @Override
-    public void consume(List<Update> updates) {
-        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-    }
-
     @Override
     public void consume(Update update) {
-        // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Create your send message object
-            SendMessage sendMessage = new SendMessage(update.getMessage().getChatId(), update.getMessage().getText());
+            String ChatId = String.valueOf(update.getMessage().getChatId());
+            SendMessage sendMessage = new SendMessage(ChatId, update.getMessage().getText());
             try {
-                // Execute it
-                telegramClient.execute(method);
+                telegramClient.execute(sendMessage);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
