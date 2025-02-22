@@ -9,9 +9,9 @@ public class TelegramBotApplication {
 
 	public static void main(String[] args) {
 		try {
-			String botToken = Bot.TOKEN;
 			TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
-			botsApplication.registerBot(botToken, new Bot());
+			botsApplication.registerBot(Constants.BOT_TOKEN, new Bot(Constants.BOT_TOKEN));
+			System.out.println("Bot started successfully!");
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 		}

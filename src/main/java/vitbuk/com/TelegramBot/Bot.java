@@ -11,18 +11,27 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.util.List;
 
 public class Bot implements LongPollingSingleThreadUpdateConsumer {
-    static final String TOKEN = Constants.BOT_TOKEN;
-    static final String USERNAME = Constants.BOT_USERNAME;
+    private final TelegramClient telegramClient;
 
-    TelegramClient telegramClient = new OkHttpTelegramClient(TOKEN);
+    public Bot (String botToken) {
+        this.telegramClient = new OkHttpTelegramClient(botToken);
+    }
 
     @Override
     public void consume(Update update) {
+        // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String ChatId = String.valueOf(update.getMessage().getChatId());
-            SendMessage sendMessage = new SendMessage(ChatId, update.getMessage().getText());
+            // Set variables
+            String message_text = update.getMessage().getText();
+            long chat_id = update.getMessage().getChatId();
+
+            SendMessage message = SendMessage // Create a message object
+                    .builder()
+                    .chatId(chat_id)
+                    .text(message_text)
+                    .build();
             try {
-                telegramClient.execute(sendMessage);
+                telegramClient.execute(message); // Sending our message object to user
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
