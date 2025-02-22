@@ -23,20 +23,38 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
 
     @Override
     public void consume(Update update) {
-
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = createSendMessage(update);
+        String messageText = update.getMessage().getText();
+        long chatId = update.getMessage().getChatId();
+        // if user use /start command
+        if (messageText.equals("/start")) {
+            SendMessage message = SendMessage
+                    .builder()
+                    .chatId(chatId)
+                    .text(messageText)
+                    .build();
             try {
-                telegramClient.execute(message); // Sending our message object to user
+                telegramClient.execute(message);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
-
-        } else if (update.hasMessage() && update.getMessage().hasPhoto()) {
-            SendPhoto photoMessage = createPhotoMessage(update);
+            //if user use /pic command
+        } else if (messageText.equals("/pic")) {
+            SendPhoto photoMessage = createPhotoMessage(chatId);
 
             try {
                 telegramClient.execute(photoMessage);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+            //other cases, where we dont understand user
+        } else {
+            SendMessage message = SendMessage
+                    .builder()
+                    .chatId(chatId)
+                    .text("Unknown command")
+                    .build();
+            try {
+                telegramClient.execute(message);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -44,44 +62,12 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
 
     }
 
-    private SendMessage createSendMessage(Update update) {
-        String message_text = update.getMessage().getText();
-        long chat_id = update.getMessage().getChatId();
-
-        return SendMessage
-                .builder()
-                .chatId(chat_id)
-                .text(message_text)
-                .build();
-    }
-
-    private SendPhoto createPhotoMessage(Update update) {
-        // Set variables
-        long chat_id = update.getMessage().getChatId();
-
-        // Array with photo objects with different sizes
-        // We will get the biggest photo from that array
-        List<PhotoSize> photos = update.getMessage().getPhoto();
-        // Know file_id
-        String f_id = photos.stream().max(Comparator.comparing(PhotoSize::getFileSize))
-                .map(PhotoSize::getFileId)
-                .orElse("");
-        // Know photo width
-        int f_width = photos.stream().max(Comparator.comparing(PhotoSize::getFileSize))
-                .map(PhotoSize::getWidth)
-                .orElse(0);
-        // Know photo height
-        int f_height = photos.stream().max(Comparator.comparing(PhotoSize::getFileSize))
-                .map(PhotoSize::getHeight)
-                .orElse(0);
-        // Set photo caption
-        String caption = "file_id: " + f_id + "\nwidth: " + Integer.toString(f_width) + "\nheight: " + Integer.toString(f_height);
-
+    private SendPhoto createPhotoMessage(long chatId) {
         return SendPhoto
                 .builder()
-                .chatId(chat_id)
-                .photo(new InputFile(f_id))
-                .caption(caption)
+                .chatId(chatId)
+                .photo(new InputFile(Constants.CAESAR_PIC_URL))
+                .caption("Caesar")
                 .build();
     }
 }
