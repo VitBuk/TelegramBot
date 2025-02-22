@@ -25,15 +25,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public void consume(Update update) {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Set variables
-            String message_text = update.getMessage().getText();
-            long chat_id = update.getMessage().getChatId();
-            SendMessage message = SendMessage
-                    .builder()
-                    .chatId(chat_id)
-                    .text(message_text)
-                    .build();
-
+            SendMessage message = createSendMessage(update);
             try {
                 telegramClient.execute(message); // Sending our message object to user
             } catch (TelegramApiException e) {
@@ -44,12 +36,23 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
             SendPhoto photoMessage = createPhotoMessage(update);
 
             try {
-                telegramClient.execute(photoMessage); 
+                telegramClient.execute(photoMessage);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
 
+    }
+
+    private SendMessage createSendMessage(Update update) {
+        String message_text = update.getMessage().getText();
+        long chat_id = update.getMessage().getChatId();
+
+        return SendMessage
+                .builder()
+                .chatId(chat_id)
+                .text(message_text)
+                .build();
     }
 
     private SendPhoto createPhotoMessage(Update update) {
@@ -73,13 +76,12 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
                 .orElse(0);
         // Set photo caption
         String caption = "file_id: " + f_id + "\nwidth: " + Integer.toString(f_width) + "\nheight: " + Integer.toString(f_height);
-        SendPhoto message = SendPhoto
+
+        return SendPhoto
                 .builder()
                 .chatId(chat_id)
                 .photo(new InputFile(f_id))
                 .caption(caption)
                 .build();
-
-        return message;
     }
 }
