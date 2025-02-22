@@ -12,8 +12,11 @@ public class TelegramBotApplication {
 			TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
 			botsApplication.registerBot(Constants.BOT_TOKEN, new Bot(Constants.BOT_TOKEN));
 			System.out.println("Bot started successfully!");
+			Thread.currentThread().join();
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }
